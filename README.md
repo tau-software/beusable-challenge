@@ -39,6 +39,11 @@ should return:
 }
 ```
 
+### List submitted queries
+```json
+curl http://localhost:8080/queries
+```
+
 ### Health check
 ```json
 curl http://localhost:8080/actuator/health

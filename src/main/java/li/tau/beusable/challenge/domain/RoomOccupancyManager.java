@@ -7,7 +7,7 @@ import java.util.EnumMap;
 import java.util.Stack;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.reverseOrder;
+import static java.util.Comparator.naturalOrder;
 import static li.tau.beusable.challenge.domain.RoomType.ECONOMY;
 import static li.tau.beusable.challenge.domain.RoomType.PREMIUM;
 
@@ -20,7 +20,7 @@ public class RoomOccupancyManager {
     public EnumMap<RoomType, Occupancy> bid(int[] guestsBids) {
         Stack<Integer> bids = new Stack<>();
         bids.addAll(asList(ArrayUtils.toObject(guestsBids)));
-        bids.sort(reverseOrder());
+        bids.sort(naturalOrder());
 
         int availablePremium = premium;
         int moneyPremium = 0;
@@ -32,7 +32,7 @@ public class RoomOccupancyManager {
 
         // Fill premium rooms
         while (!bids.isEmpty()
-                && bids.firstElement() >= 100
+                && bids.peek() >= 100
                 && availablePremium > 0) {
             moneyPremium += bids.pop();
             ++roomsPremium;

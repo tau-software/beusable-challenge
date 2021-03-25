@@ -9,6 +9,7 @@ import java.util.Stack;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.naturalOrder;
+import static java.util.Map.of;
 import static li.tau.beusable.challenge.domain.RoomType.ECONOMY;
 import static li.tau.beusable.challenge.domain.RoomType.PREMIUM;
 
@@ -31,19 +32,16 @@ public class RoomOccupancyManager {
         bids.sort(naturalOrder());
 
         int availablePremium = premium;
-        int moneyPremium = 0;
-        int roomsPremium = 0;
+        Occupancy premiumOccupancy = new Occupancy();
 
         int availableEconomy = economy;
-        int moneyEconomy = 0;
-        int roomsEconomy = 0;
+        Occupancy economyOccupancy = new Occupancy();
 
         // Fill premium rooms
         while (!bids.isEmpty()
                 && bids.peek() >= 100
                 && availablePremium > 0) {
-            moneyPremium += bids.pop();
-            ++roomsPremium;
+            premiumOccupancy.book(bids.pop());
             --availablePremium;
         }
 
@@ -54,23 +52,20 @@ public class RoomOccupancyManager {
         // but left enough to fill all economy rooms
         while (availablePremium > 0
                 && bids.size() > availableEconomy) {
-            moneyPremium += bids.pop();
-            ++roomsPremium;
+            premiumOccupancy.book(bids.pop());
             --availablePremium;
         }
 
         // Fill economy rooms
         while (bids.size() > 0
                 && availableEconomy > 0) {
-            moneyEconomy += bids.pop();
-            ++roomsEconomy;
+            economyOccupancy.book(bids.pop());
             --availableEconomy;
         }
 
-        EnumMap<RoomType, Occupancy> result = new EnumMap<>(RoomType.class);
-        result.put(PREMIUM, new Occupancy(roomsPremium, moneyPremium));
-        result.put(ECONOMY, new Occupancy(roomsEconomy, moneyEconomy));
-
-        return result;
+        return new EnumMap<>(of(
+                PREMIUM, premiumOccupancy,
+                ECONOMY, economyOccupancy
+        ));
     }
 }

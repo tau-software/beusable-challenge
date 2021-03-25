@@ -1,12 +1,20 @@
 package li.tau.beusable.challenge.domain;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Value
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Occupancy {
 
-    int rooms;
+    private int rooms = 0;
 
-    int money;
+    private int money = 0;
 
+    public void book(int price) {
+        this.money += price;
+        this.rooms++;
+    }
 }

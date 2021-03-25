@@ -1,13 +1,8 @@
 package li.tau.beusable.challenge;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CodingChallengeApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
+public class CodingChallengeApplicationTests {
 
 }

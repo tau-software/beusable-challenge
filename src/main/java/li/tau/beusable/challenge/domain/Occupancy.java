@@ -6,6 +6,7 @@ import lombok.Value;
 public class Occupancy {
 
     int rooms;
+
     int money;
 
 }

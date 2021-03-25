@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.EnumMap;
 import java.util.Stack;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.naturalOrder;
 import static li.tau.beusable.challenge.domain.RoomType.ECONOMY;
@@ -16,6 +17,13 @@ public class RoomOccupancyManager {
 
     int premium;
     int economy;
+
+    public RoomOccupancyManager(int premium, int economy) {
+        checkArgument(premium >= 0, "Premium rooms number should be positive or zero.");
+        checkArgument(economy >= 0, "Economy rooms number should be positive or zero.");
+        this.premium = premium;
+        this.economy = economy;
+    }
 
     public EnumMap<RoomType, Occupancy> bid(int[] guestsBids) {
         Stack<Integer> bids = new Stack<>();

@@ -1,11 +1,14 @@
 package li.tau.beusable.challenge.domain;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static li.tau.beusable.challenge.domain.RoomType.ECONOMY;
 import static li.tau.beusable.challenge.domain.RoomType.PREMIUM;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class RoomOccupancyManagerTest {
 
@@ -60,6 +63,49 @@ public class RoomOccupancyManagerTest {
                     assertThat(occupancy)
                             .extracting(Occupancy::getMoney)
                             .isEqualTo(correctMoney[1]);
+                });
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-3, 2", "4,-3", "-8,-9"})
+    void should_throwException_when_negative_rooms(int premium, int economy) {
+        // when
+        var assertion = assertThatThrownBy(() -> {
+            new RoomOccupancyManager(premium, economy);
+        });
+
+        // then
+        assertion.isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void should_handle_when_empty_bids() {
+        // given
+        var testedObject = new RoomOccupancyManager(3, 3);
+        var emptyBids = new int[0];
+
+        // when
+        var result = testedObject.bid(emptyBids);
+
+        // then
+        assertThat(result)
+                .isNotNull()
+                .hasSize(2)
+                .hasEntrySatisfying(PREMIUM, occupancy -> {
+                    assertThat(occupancy)
+                            .extracting(Occupancy::getRooms)
+                            .isEqualTo(0);
+                    assertThat(occupancy)
+                            .extracting(Occupancy::getMoney)
+                            .isEqualTo(0);
+                })
+                .hasEntrySatisfying(ECONOMY, occupancy -> {
+                    assertThat(occupancy)
+                            .extracting(Occupancy::getRooms)
+                            .isEqualTo(0);
+                    assertThat(occupancy)
+                            .extracting(Occupancy::getMoney)
+                            .isEqualTo(0);
                 });
     }
 

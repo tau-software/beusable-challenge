@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import li.tau.beusable.challenge.CodingChallengeApplicationTests;
 import li.tau.beusable.challenge.api.BidRequest.Rooms;
 import li.tau.beusable.challenge.domain.Occupancy;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,42 @@ class RoomOccupancyApiControllerTest extends CodingChallengeApplicationTests {
         result
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(correctResponse)));
+    }
+
+    @Test
+    void should_400_when_no_rooms() throws Exception {
+        // given
+        var request = new BidRequest(null, IN_GUESTS_BIDS);
+
+        // then
+        var result = mockMvc.perform(
+                post("/bid")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result
+                .andExpect(status().is(400));
+    }
+
+    @Test
+        // TODO can be parameterized with should_400_when_no_rooms
+        // and extended with more inproper request data
+    void should_400_when_negative_bid() throws Exception {
+        // given
+        int[] guestsBidsWithNegative = IN_GUESTS_BIDS.clone();
+        guestsBidsWithNegative[3] = -12;
+        var request = new BidRequest(new Rooms(3, 3), guestsBidsWithNegative);
+
+        // then
+        var result = mockMvc.perform(
+                post("/bid")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        result
+                .andExpect(status().is(400));
     }
 
 }

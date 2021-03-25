@@ -1,38 +1,67 @@
 package li.tau.beusable.challenge.domain;
 
 import lombok.Value;
+import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.Stack;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.reverseOrder;
+import static li.tau.beusable.challenge.domain.RoomType.ECONOMY;
+import static li.tau.beusable.challenge.domain.RoomType.PREMIUM;
 
 @Value
 public class RoomOccupancyManager {
 
-    private static final int[] MOCK_GUESTS_BIDS = new int[]{23, 45, 155, 374, 22, 99, 100, 101, 115, 209};
     int premium;
     int economy;
 
     public EnumMap<RoomType, Occupancy> bid(int[] guestsBids) {
-        if (!Arrays.equals(MOCK_GUESTS_BIDS, guestsBids)) {
-            throw new IllegalArgumentException("Not implemented yet for custom guests bids.");
-        }
-        EnumMap<RoomType, Occupancy> result = new EnumMap<>(RoomType.class);
-        if (premium == 3 && economy == 3) {
-            result.put(RoomType.PREMIUM, new Occupancy(3, 738));
-            result.put(RoomType.ECONOMY, new Occupancy(3, 167));
-        } else if (premium == 7 && economy == 5) {
-            result.put(RoomType.PREMIUM, new Occupancy(6, 1054));
-            result.put(RoomType.ECONOMY, new Occupancy(4, 189));
-        } else if (premium == 2 && economy == 7) {
-            result.put(RoomType.PREMIUM, new Occupancy(2, 583));
-            result.put(RoomType.ECONOMY, new Occupancy(4, 189));
-        } else if (premium == 7 && economy == 1) {
-            result.put(RoomType.PREMIUM, new Occupancy(7, 1153));
-            result.put(RoomType.ECONOMY, new Occupancy(1, 45));
-        } else {
-            throw new IllegalArgumentException("Not implemented yet for custom room availability.");
+        Stack<Integer> bids = new Stack<>();
+        bids.addAll(asList(ArrayUtils.toObject(guestsBids)));
+        bids.sort(reverseOrder());
+
+        int availablePremium = premium;
+        int moneyPremium = 0;
+        int roomsPremium = 0;
+
+        int availableEconomy = economy;
+        int moneyEconomy = 0;
+        int roomsEconomy = 0;
+
+        // Fill premium rooms
+        while (!bids.isEmpty()
+                && bids.firstElement() >= 100
+                && availablePremium > 0) {
+            moneyPremium += bids.pop();
+            ++roomsPremium;
+            --availablePremium;
         }
 
+        // No more premium bids will be satisfied
+        bids.removeIf(bid -> bid >= 100);
+
+        // If premium rooms left, fill with top economy bids,
+        // but left enough to fill all economy rooms
+        while (availablePremium > 0
+                && bids.size() > availableEconomy) {
+            moneyPremium += bids.pop();
+            ++roomsPremium;
+            --availablePremium;
+        }
+
+        // Fill economy rooms
+        while (bids.size() > 0
+                && availableEconomy > 0) {
+            moneyEconomy += bids.pop();
+            ++roomsEconomy;
+            --availableEconomy;
+        }
+
+        EnumMap<RoomType, Occupancy> result = new EnumMap<>(RoomType.class);
+        result.put(PREMIUM, new Occupancy(roomsPremium, moneyPremium));
+        result.put(ECONOMY, new Occupancy(roomsEconomy, moneyEconomy));
 
         return result;
     }
